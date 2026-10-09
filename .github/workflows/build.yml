@@ -85,7 +85,8 @@ EOF
 
           # FASTFETCH COLORED ASCII LOGO SETUP (M = Blue, OS = Green)
           mkdir -p config/includes.chroot/etc/skel/.config/fastfetch
-          printf '\033[36m   __  __  \033[32m ___  ____  \033[0m\n\033[36m  |  \\/  | \033[32m/ _ \\/ ___| \033[0m\n\033[36m  | |\\/| | \033[32m| | | \\___ \\ \033[0m\n\033[36m  | |  | | \033[32m| |_| |___) |\033[0m\n\033[36m  |_|  |_| \033[32m\\___/|____/ \033[0m\n' > config/includes.chroot/etc/skel/.config/fastfetch/mos.txt
+          echo "G2VsY29tZSB0byBNT1M=" > /dev/null
+          echo -e "\e[36m   __  __  \e[32m ___  ____  \e[0m\n\e[36m  |  \/  | \e[32m/ _ \/ ___| \e[0m\n\e[36m  | |\/| | \e[32m| | | \___ \ \e[0m\n\e[36m  | |  | | \e[32m| |_| |___) |\e[0m\n\e[36m  |_|  |_| \e[32m\___/|____/ \e[0m" > config/includes.chroot/etc/skel/.config/fastfetch/mos.txt
 
           # Fastfetch Config
           cat <<'EOF' > config/includes.chroot/etc/skel/.config/fastfetch/config.jsonc
