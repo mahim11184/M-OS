@@ -1,35 +1,38 @@
-name: Build MOS (Mighty OS) - Server Fixed
+name: Build MOS (Mighty OS) - Container Fixed
 
 on:
   workflow_dispatch:
 
 jobs:
   build-mos:
+    # গিটহাবের সার্ভার রান হবে
     runs-on: ubuntu-24.04
 
+    # আমরা সরাসরি ডেবিয়ানের অফিশিয়াল কন্টেইনারের ভেতর পুরো কাজটা করব
+    container:
+      image: debian:bookworm
+      options: --privileged # সব ধরনের ফাইল তৈরির পারমিশন লক করার জন্য
+
     steps:
+    - name: Install Base Tools inside Debian
+      run: |
+        apt-get update
+        apt-get install -y live-build debootstrap wget git coreutils xz-utils
+
     - name: Checkout Blueprint
       uses: actions/checkout@v4
 
-    - name: Set Up OS Build Environment
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y live-build debootstrap systemd-container wget debian-archive-keyring
-
     - name: Configure and Compile MOS ISO
       run: |
-        # ডেবিয়ানের অফিশিয়াল মিরর সার্ভার এবং কী-রিং পরিষ্কারভাবে চিনিয়ে দেওয়া (উবুন্টুর এরর দূর করতে)
-        sudo lb config --architectures amd64 \
-                       --distribution bookworm \
-                       --binary-images iso-hybrid \
-                       --archive-areas "main contrib non-free non-free-firmware" \
-                       --mirror-bootstrap "http://debian.org" \
-                       --mirror-chroot "http://debian.org" \
-                       --mirror-binary "http://debian.org"
+        # এবার পিউর ডেবিয়ান থেকে কনফিগারেশন রান হবে, কোনো উবুন্টুর এরর আসবে না
+        lb config --architectures amd64 \
+                  --distribution bookworm \
+                  --binary-images iso-hybrid \
+                  --archive-areas "main contrib non-free non-free-firmware"
         
-        # ৩ জিবির নিচে রাখার জন্য প্রয়োজনীয় প্যাকেজ লিস্ট
-        sudo mkdir -p config/package-lists
-        sudo bash -c 'cat <<EOF > config/package-lists/mos-core.list.chroot
+        # ৩ জিবির নিচে রাখার জন্য প্রয়োজনীয় প্যাকেজ লিস্ট
+        mkdir -p config/package-lists
+        cat <<EOF > config/package-lists/mos-core.list.chroot
         xorg
         sddm
         plasma-desktop
@@ -40,23 +43,23 @@ jobs:
         konsole
         calamares
         firefox-esr
-        EOF'
+        EOF
 
         # HDD অপ্টিমাইজেশন: Baloo (সার্চ ইনডেক্সার) বন্ধ
-        sudo mkdir -p config/includes.chroot/etc/xdg
-        sudo bash -c 'cat <<EOF > config/includes.chroot/etc/xdg/baloofilerc
+        mkdir -p config/includes.chroot/etc/xdg
+        cat <<EOF > config/includes.chroot/etc/xdg/baloofilerc
         [Basic Settings]
         Indexing-Enabled=false
-        EOF'
+        EOF
 
         # নিয়ন ডার্ক থিম সেটআপ
-        sudo bash -c 'cat <<EOF > config/includes.chroot/etc/xdg/kdeglobals
+        cat <<EOF > config/includes.chroot/etc/xdg/kdeglobals
         [KDE]
         LookAndFeelPackage=org.kde.breezedark.desktop
-        EOF'
+        EOF
 
         # হাই এফপিএস এর জন্য উইন্ডো অ্যানিমেশন বন্ধ
-        sudo bash -c 'cat <<EOF > config/includes.chroot/etc/xdg/kwinrc
+        cat <<EOF > config/includes.chroot/etc/xdg/kwinrc
         [org.kde.kdecoration2]
         theme=org.kde.breezedark
         [Compositing]
@@ -64,28 +67,28 @@ jobs:
         AnimationSpeed=0
         Backend=OpenGL
         WindowsBlockCompositing=true
-        EOF'
+        EOF
 
         # নতুন ইউজারের জন্য থিম প্রোফাইল কপি করা
-        sudo mkdir -p config/includes.chroot/etc/skel/.config
-        sudo cp config/includes.chroot/etc/xdg/kdeglobals config/includes.chroot/etc/skel/.config/kdeglobals
-        sudo cp config/includes.chroot/etc/xdg/kwinrc config/includes.chroot/etc/skel/.config/kwinrc
+        mkdir -p config/includes.chroot/etc/skel/.config
+        cp config/includes.chroot/etc/xdg/kdeglobals config/includes.chroot/etc/skel/.config/kdeglobals
+        cp config/includes.chroot/etc/xdg/kwinrc config/includes.chroot/etc/skel/.config/kwinrc
 
         # ওয়ালপেপার ডিরেক্টরি তৈরি করে ডাউনলোড করা
-        sudo mkdir -p config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/
-        sudo wget -q -O config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png "https://prodia.xyz" || echo "Wallpaper download skipped"
+        mkdir -p config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/
+        wget -q -O config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png "https://prodia.xyz" || echo "Wallpaper download skipped"
 
         # প্লাজমাতে ডিফল্ট ওয়ালপেপার রেজিস্ট্রি করা
-        sudo bash -c 'cat <<EOF > config/includes.chroot/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
+        cat <<EOF > config/includes.chroot/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
         [Containments]
         plugin=org.kde.plasma.folder
         wallpaperplugin=org.kde.image
         [Containments][Wallpaper][org.kde.image][General]
         Image=/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png
-        EOF'
+        EOF
 
-        # ডেবিয়ান সার্ভার থেকে ওএস ডাউনলোড ও কম্পাইল শুরু
-        sudo lb build
+        # ওএস কম্পাইল শুরু
+        lb build
 
     - name: Release MOS ISO
       if: always()
