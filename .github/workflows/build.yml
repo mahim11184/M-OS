@@ -22,7 +22,7 @@ jobs:
 
       - name: Configure and Compile MOS ISO
         run: |
-          # Debian Configuration
+          # Debian Live-Build Configuration
           lb config --architectures amd64 \
                     --distribution bookworm \
                     --binary-images iso-hybrid \
@@ -80,13 +80,47 @@ jobs:
           WindowsBlockCompositing=true
           EOF
 
-          # Fastfetch Auto-start with MOS Title
+          # FASTFETCH COLORED ASCII LOGO SETUP (M = Blue, OS = Green)
+          mkdir -p config/includes.chroot/etc/skel/.config/fastfetch
+          cat <<'EOF' > config/includes.chroot/etc/skel/.config/fastfetch/mos.txt
+\u001b[36m   __  __  \u001b[32m ___  ____  \u001b[0m
+\u001b[36m  |  \/  | \u001b[32m/ _ \/ ___| \u001b[0m
+\u001b[36m  | |\/| | \u001b[32m| | | \___ \ \u001b[0m
+\u001b[36m  | |  | | \u001b[32m| |_| |___) |\u001b[0m
+\u001b[36m  |_|  |_| \u001b[32m\___/|____/ \u001b[0m
+EOF
+
+          # Fastfetch Config
+          cat <<EOF > config/includes.chroot/etc/skel/.config/fastfetch/config.jsonc
+{
+  "\$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "raw",
+    "source": "/home/\$USER/.config/fastfetch/mos.txt"
+  },
+  "modules": [
+    "title",
+    "separator",
+    "os",
+    "host",
+    "kernel",
+    "uptime",
+    "packages",
+    "shell",
+    "wm",
+    "memory",
+    "disk"
+  ]
+}
+EOF
+
+          # Auto-start Fastfetch on Konsole
           mkdir -p config/includes.chroot/etc/skel/
           cat <<EOF >> config/includes.chroot/etc/skel/.bashrc
-          if [ -f /usr/bin/fastfetch ]; then
-              fastfetch --structure Title:Kernel:Uptime:Packages:Shell:WM:Memory
-          fi
-          EOF
+if [ -f /usr/bin/fastfetch ]; then
+    fastfetch -c ~/.config/fastfetch/config.jsonc
+fi
+EOF
 
           # Copy Theme Config to Skel
           mkdir -p config/includes.chroot/etc/skel/.config
@@ -99,92 +133,55 @@ jobs:
 
           # Plasma Wallpaper Registry
           cat <<EOF > config/includes.chroot/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
-          [Containments][1]
-          plugin=org.kde.plasma.folder
-          wallpaperplugin=org.kde.image
+[Containments][1]
+plugin=org.kde.plasma.folder
+wallpaperplugin=org.kde.image
 
-          [Containments][1][Wallpaper][org.kde.image][General]
-          Image=/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png
-          EOF
+[Containments][1][Wallpaper][org.kde.image][General]
+Image=/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png
+EOF
 
           # CALAMARES COOL INSTALLATION SCREEN SETUP
           mkdir -p config/includes.chroot/etc/calamares/branding/mos
           
           # Calamares Branding Config
           cat <<EOF > config/includes.chroot/etc/calamares/branding/mos/branding.desc
-          ---
-          componentName:  mos
-          welcomeStyleCalamares: false
-          welcomeExpandingWallpaper: true
-          shortProductName: MOS
-          version: 1.0
-          shortVersion: 1.0
-          versionedName: Mighty OS 1.0
-          shortVersionedName: MOS 1.0
-          productName: Mighty OS
-          productUrl: https://github.com/mahim11184/M-OS
-          supportUrl: https://github.com/mahim11184/M-OS
-          sidebar: widget
-          navigation: widget
-          style:
-            sidebarBackground: "#121318"
-            sidebarText: "#FFFFFF"
-            sidebarTextSelect: "#00d2ff"
-          slideshow: "show.qml"
-          EOF
+---
+componentName:  mos
+welcomeStyleCalamares: false
+welcomeExpandingWallpaper: true
+shortProductName: MOS
+version: 1.0
+shortVersion: 1.0
+versionedName: Mighty OS 1.0
+shortVersionedName: MOS 1.0
+productName: Mighty OS
+productUrl: https://github.com/mahim11184/M-OS
+supportUrl: https://github.com/mahim11184/M-OS
+style:
+  sidebarBackground: "#121318"
+  sidebarText: "#FFFFFF"
+  sidebarTextSelect: "#00d2ff"
+slideshow: "show.qml"
+EOF
 
           # Calamares Dark Slideshow QML
           cat <<EOF > config/includes.chroot/etc/calamares/branding/mos/show.qml
-          import QtQuick 2.0
-          import calamares.slideshow 1.0
+import QtQuick 2.0
+import calamares.slideshow 1.0
 
-          Presentation {
-              id: presentation
+Presentation {
+    id: presentation
 
-              Timer {
-                  interval: 4000
-                  running: true
-                  repeat: true
-                  onTriggered: presentation.goToNextSlide()
-              }
+    Timer {
+        interval: 4000
+        running: true
+        repeat: true
+        onTriggered: presentation.goToNextSlide()
+    }
 
-              Slide {
-                  Text {
-                      anchors.centerIn: parent
-                      text: "Welcome to Mighty OS (MOS)\n\nLightweight. High Performance. Pure Speed."
-                      color: "#00d2ff"
-                      font.pixelSize: 22
-                      font.bold: true
-                      horizontalAlignment: Text.AlignHCenter
-                  }
-              }
-
-              Slide {
-                  Text {
-                      anchors.centerIn: parent
-                      text: "Optimized for Low-End & High-End PCs\n\nEnjoy smooth KDE Plasma Experience with ZRAM Tech."
-                      color: "#ffffff"
-                      font.pixelSize: 20
-                      horizontalAlignment: Text.AlignHCenter
-                  }
-              }
-          }
-          EOF
-
-          # GRUB Boot Background Config
-          mkdir -p config/includes.chroot/etc/default/grub.d
-          cat <<EOF > config/includes.chroot/etc/default/grub.d/mos-theme.cfg
-          GRUB_BACKGROUND="/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png"
-          GRUB_GFXMODE="1920x1080,auto"
-          EOF
-
-          # Start Build Process
-          lb build
-
-      - name: Release MOS ISO
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: MOS-Mighty-Smooth-ISO
-          path: "*.iso"
-          compression-level: 0
+    Slide {
+        Text {
+            anchors.centerIn: parent
+            text: "Welcome to Mighty OS (MOS)\n\nLightweight. High Performance. Pure Speed."
+            color: "#00d2ff"
