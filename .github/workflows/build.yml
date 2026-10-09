@@ -127,9 +127,9 @@ EOF
           cp config/includes.chroot/etc/xdg/kdeglobals config/includes.chroot/etc/skel/.config/kdeglobals
           cp config/includes.chroot/etc/xdg/kwinrc config/includes.chroot/etc/skel/.config/kwinrc
 
-          # Wallpaper Setup
+          # Wallpaper Setup (Using wallpaper.jpg from repository)
           mkdir -p config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/
-          wget -q -O config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png "https://raw.githubusercontent.com/KDE/breeze-artwork/master/wallpapers/Next/contents/images/1920x1080.png" || echo "Wallpaper download skipped"
+          wget -q -O config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png "https://raw.githubusercontent.com/mahim11184/M-OS/main/wallpaper.jpg" || echo "Wallpaper download skipped"
 
           # Plasma Wallpaper Registry
           cat <<EOF > config/includes.chroot/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
@@ -141,7 +141,7 @@ wallpaperplugin=org.kde.image
 Image=/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png
 EOF
 
-          # CALAMARES COOL INSTALLATION SCREEN SETUP
+          # CALAMARES INSTALLATION SCREEN SETUP
           mkdir -p config/includes.chroot/etc/calamares/branding/mos
           
           # Calamares Branding Config
@@ -185,3 +185,41 @@ Presentation {
             anchors.centerIn: parent
             text: "Welcome to Mighty OS (MOS)\n\nLightweight. High Performance. Pure Speed."
             color: "#00d2ff"
+            font.pixelSize: 22
+            font.bold: true
+            horizontalAlignment: Text.AlignHCenter
+        }
+    }
+
+    Slide {
+        Text {
+            anchors.centerIn: parent
+            text: "Optimized for Low-End & High-End PCs\n\nEnjoy smooth KDE Plasma Experience with ZRAM Tech."
+            color: "#ffffff"
+            font.pixelSize: 20
+            horizontalAlignment: Text.AlignHCenter
+        }
+    }
+}
+EOF
+
+          # GRUB Boot Background Config (Using boot.jpg from repository)
+          mkdir -p config/includes.chroot/boot/grub/
+          wget -q -O config/includes.chroot/boot/grub/mos-boot.jpg "https://raw.githubusercontent.com/mahim11184/M-OS/main/boot.jpg" || echo "Boot image download skipped"
+
+          mkdir -p config/includes.chroot/etc/default/grub.d
+          cat <<EOF > config/includes.chroot/etc/default/grub.d/mos-theme.cfg
+GRUB_BACKGROUND="/boot/grub/mos-boot.jpg"
+GRUB_GFXMODE="1920x1080,auto"
+EOF
+
+          # Start Build Process
+          lb build
+
+      - name: Release MOS ISO
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MOS-Mighty-Smooth-ISO
+          path: "*.iso"
+          compression-level: 0
