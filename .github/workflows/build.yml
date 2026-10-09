@@ -1,4 +1,4 @@
-name: Build MOS (Mighty OS) - Neon Edition
+name: Build MOS (Mighty OS) - Final Fixed
 
 on:
   workflow_dispatch:
@@ -14,34 +14,42 @@ jobs:
     - name: Set Up OS Build Environment
       run: |
         sudo apt-get update
-        sudo apt-get install -y live-build debootstrap systemd-container
+        sudo apt-get install -y live-build debootstrap systemd-container wget
 
     - name: Configure MOS Neon Customizations
       run: |
         mkdir -p build && cd build
         lb config --architectures amd64 --distribution bookworm --binary-images iso-hybrid --archive-areas "main contrib non-free non-free-firmware"
         
-        # ৩ জিবির নিচে লাইটওয়েট প্যাকেজ লিস্ট (৪জিবি র‍্যামের জন্য পারফেক্ট)
+        # প্যাকেজ লিস্ট একদম ফিক্সড (Exit Code 8 দূর করার জন্য)
         mkdir -p config/package-lists
         cat <<EOF > config/package-lists/mos-core.list.chroot
-        xorg sddm plasma-desktop plasma-nm powerdevil kscreen
-        dolphin konsole calamares calamares-settings-debian
-        firefox-esr gwenview micro firefox-esr-l10n-bn
+        xorg
+        sddm
+        plasma-desktop
+        plasma-nm
+        powerdevil
+        kscreen
+        dolphin
+        konsole
+        calamares
+        firefox-esr
         EOF
 
-        # HDD প্রো-টিপস: Baloo (সার্চ ইনডেক্সার) চিরতরে বন্ধ
+        # HDD অপ্টিমাইজেশন: Baloo (সার্চ ইনডেক্সার) বন্ধ
         mkdir -p config/includes.chroot/etc/xdg
         cat <<EOF > config/includes.chroot/etc/xdg/baloofilerc
         [Basic Settings]
         Indexing-Enabled=false
         EOF
 
-        # নিয়ন ডার্ক থিম এবং জিরো অ্যানিমেশন (হাই এফপিএস এর জন্য)
+        # নিয়ন ডার্ক থিম সেটআপ
         cat <<EOF > config/includes.chroot/etc/xdg/kdeglobals
         [KDE]
         LookAndFeelPackage=org.kde.breezedark.desktop
         EOF
 
+        # হাই এফপিএস এর জন্য উইন্ডো অ্যানিমেশন বন্ধ
         cat <<EOF > config/includes.chroot/etc/xdg/kwinrc
         [org.kde.kdecoration2]
         theme=org.kde.breezedark
@@ -52,16 +60,16 @@ jobs:
         WindowsBlockCompositing=true
         EOF
 
-        # ইউজারের জন্য নিয়ন ডার্ক থিম কপি করা
+        # নতুন ইউজারের জন্য থিম প্রোফাইল ব্যাকআপ
         mkdir -p config/includes.chroot/etc/skel/.config
         cp config/includes.chroot/etc/xdg/kdeglobals config/includes.chroot/etc/skel/.config/kdeglobals
         cp config/includes.chroot/etc/xdg/kwinrc config/includes.chroot/etc/skel/.config/kwinrc
 
-        # আপনার জন্য জেনারেট করা MOS অফিশিয়াল নিয়ন ওয়ালপেপারটি সিস্টেমে যুক্ত করা
+        # ওয়ালপেপার ডিরেক্টরি তৈরি করে ডাউনলোড করা
         mkdir -p config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/
-        wget -O config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png "https://prodia.xyz"
+        wget -q -O config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png "https://prodia.xyz" || echo "Wallpaper download skipped"
 
-        # ওয়ালপেপার প্লাজমাতে ডিফল্ট হিসেবে সেট করা
+        # প্লাজমাতে ডিফল্ট ওয়ালপেপার রেজিস্ট্রি করা
         cat <<EOF > config/includes.chroot/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
         [Containments]
         plugin=org.kde.plasma.folder
@@ -76,6 +84,7 @@ jobs:
         sudo lb build
 
     - name: Release MOS ISO
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: MOS-Mighty-Smooth-ISO
