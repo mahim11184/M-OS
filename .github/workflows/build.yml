@@ -2,6 +2,9 @@ name: Build MOS (Mighty OS) - Container Fixed
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build-mos:
@@ -30,7 +33,7 @@ jobs:
           
           # Ultra-Lightweight Package List
           mkdir -p config/package-lists
-          cat <<EOF > config/package-lists/mos-core.list.chroot
+          cat <<'EOF' > config/package-lists/mos-core.list.chroot
           xorg
           sddm
           plasma-desktop
@@ -47,30 +50,30 @@ jobs:
           curl
           git
           zram-tools
-          EOF
+EOF
 
           # Enable ZRAM for Ultra Fast RAM Compression
           mkdir -p config/includes.chroot/etc/default/
-          cat <<EOF > config/includes.chroot/etc/default/zramswap
+          cat <<'EOF' > config/includes.chroot/etc/default/zramswap
           ALGORITHM=lz4
           PERCENT=50
-          EOF
+EOF
 
           # Baloo Indexer Off (HDD Optimization)
           mkdir -p config/includes.chroot/etc/xdg
-          cat <<EOF > config/includes.chroot/etc/xdg/baloofilerc
+          cat <<'EOF' > config/includes.chroot/etc/xdg/baloofilerc
           [Basic Settings]
           Indexing-Enabled=false
-          EOF
+EOF
 
           # KDE Breeze Dark Theme Default
-          cat <<EOF > config/includes.chroot/etc/xdg/kdeglobals
+          cat <<'EOF' > config/includes.chroot/etc/xdg/kdeglobals
           [KDE]
           LookAndFeelPackage=org.kde.breezedark.desktop
-          EOF
+EOF
 
           # High FPS Window Animation Tweak
-          cat <<EOF > config/includes.chroot/etc/xdg/kwinrc
+          cat <<'EOF' > config/includes.chroot/etc/xdg/kwinrc
           [org.kde.kdecoration2]
           theme=org.kde.breezedark
           [Compositing]
@@ -78,7 +81,7 @@ jobs:
           AnimationSpeed=0
           Backend=OpenGL
           WindowsBlockCompositing=true
-          EOF
+EOF
 
           # FASTFETCH COLORED ASCII LOGO SETUP (M = Blue, OS = Green)
           mkdir -p config/includes.chroot/etc/skel/.config/fastfetch
@@ -91,12 +94,12 @@ jobs:
 EOF
 
           # Fastfetch Config
-          cat <<EOF > config/includes.chroot/etc/skel/.config/fastfetch/config.jsonc
+          cat <<'EOF' > config/includes.chroot/etc/skel/.config/fastfetch/config.jsonc
 {
-  "\$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
   "logo": {
     "type": "raw",
-    "source": "/home/\$USER/.config/fastfetch/mos.txt"
+    "source": "~/.config/fastfetch/mos.txt"
   },
   "modules": [
     "title",
@@ -116,7 +119,7 @@ EOF
 
           # Auto-start Fastfetch on Konsole
           mkdir -p config/includes.chroot/etc/skel/
-          cat <<EOF >> config/includes.chroot/etc/skel/.bashrc
+          cat <<'EOF' >> config/includes.chroot/etc/skel/.bashrc
 if [ -f /usr/bin/fastfetch ]; then
     fastfetch -c ~/.config/fastfetch/config.jsonc
 fi
@@ -132,7 +135,7 @@ EOF
           wget -q -O config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png "https://raw.githubusercontent.com/mahim11184/M-OS/main/wallpaper.jpg" || echo "Wallpaper download skipped"
 
           # Plasma Wallpaper Registry
-          cat <<EOF > config/includes.chroot/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
+          cat <<'EOF' > config/includes.chroot/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
 [Containments][1]
 plugin=org.kde.plasma.folder
 wallpaperplugin=org.kde.image
@@ -145,7 +148,7 @@ EOF
           mkdir -p config/includes.chroot/etc/calamares/branding/mos
           
           # Calamares Branding Config
-          cat <<EOF > config/includes.chroot/etc/calamares/branding/mos/branding.desc
+          cat <<'EOF' > config/includes.chroot/etc/calamares/branding/mos/branding.desc
 ---
 componentName:  mos
 welcomeStyleCalamares: false
@@ -166,7 +169,7 @@ slideshow: "show.qml"
 EOF
 
           # Calamares Dark Slideshow QML
-          cat <<EOF > config/includes.chroot/etc/calamares/branding/mos/show.qml
+          cat <<'EOF' > config/includes.chroot/etc/calamares/branding/mos/show.qml
 import QtQuick 2.0
 import calamares.slideshow 1.0
 
@@ -208,7 +211,7 @@ EOF
           wget -q -O config/includes.chroot/boot/grub/mos-boot.jpg "https://raw.githubusercontent.com/mahim11184/M-OS/main/boot.jpg" || echo "Boot image download skipped"
 
           mkdir -p config/includes.chroot/etc/default/grub.d
-          cat <<EOF > config/includes.chroot/etc/default/grub.d/mos-theme.cfg
+          cat <<'EOF' > config/includes.chroot/etc/default/grub.d/mos-theme.cfg
 GRUB_BACKGROUND="/boot/grub/mos-boot.jpg"
 GRUB_GFXMODE="1920x1080,auto"
 EOF
