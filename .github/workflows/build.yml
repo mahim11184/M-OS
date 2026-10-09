@@ -1,4 +1,4 @@
-name: Build MOS (Mighty OS) - Container Fixed
+name: Build MOS (Mighty OS)
 
 on:
   workflow_dispatch:
@@ -31,186 +31,110 @@ jobs:
                     --binary-images iso-hybrid \
                     --archive-areas "main contrib non-free non-free-firmware"
           
-          # Ultra-Lightweight Package List
+          # Package List Setup
           mkdir -p config/package-lists
-          cat <<'EOF' > config/package-lists/mos-core.list.chroot
-          xorg
-          sddm
-          plasma-desktop
-          plasma-nm
-          powerdevil
-          kscreen
-          dolphin
-          konsole
-          calamares
-          calamares-settings-debian
-          firefox-esr
-          fastfetch
-          htop
-          curl
-          git
-          zram-tools
-EOF
+          echo "xorg" > config/package-lists/mos-core.list.chroot
+          echo "sddm" >> config/package-lists/mos-core.list.chroot
+          echo "plasma-desktop" >> config/package-lists/mos-core.list.chroot
+          echo "plasma-nm" >> config/package-lists/mos-core.list.chroot
+          echo "powerdevil" >> config/package-lists/mos-core.list.chroot
+          echo "kscreen" >> config/package-lists/mos-core.list.chroot
+          echo "dolphin" >> config/package-lists/mos-core.list.chroot
+          echo "konsole" >> config/package-lists/mos-core.list.chroot
+          echo "calamares" >> config/package-lists/mos-core.list.chroot
+          echo "calamares-settings-debian" >> config/package-lists/mos-core.list.chroot
+          echo "firefox-esr" >> config/package-lists/mos-core.list.chroot
+          echo "fastfetch" >> config/package-lists/mos-core.list.chroot
+          echo "htop" >> config/package-lists/mos-core.list.chroot
+          echo "curl" >> config/package-lists/mos-core.list.chroot
+          echo "git" >> config/package-lists/mos-core.list.chroot
+          echo "zram-tools" >> config/package-lists/mos-core.list.chroot
 
-          # Enable ZRAM for Ultra Fast RAM Compression
+          # Enable ZRAM Configuration
           mkdir -p config/includes.chroot/etc/default/
-          cat <<'EOF' > config/includes.chroot/etc/default/zramswap
-          ALGORITHM=lz4
-          PERCENT=50
-EOF
+          echo "ALGORITHM=lz4" > config/includes.chroot/etc/default/zramswap
+          echo "PERCENT=50" >> config/includes.chroot/etc/default/zramswap
 
-          # Baloo Indexer Off (HDD Optimization)
+          # Disable Baloo Indexer
           mkdir -p config/includes.chroot/etc/xdg
-          cat <<'EOF' > config/includes.chroot/etc/xdg/baloofilerc
-          [Basic Settings]
-          Indexing-Enabled=false
-EOF
+          echo "[Basic Settings]" > config/includes.chroot/etc/xdg/baloofilerc
+          echo "Indexing-Enabled=false" >> config/includes.chroot/etc/xdg/baloofilerc
 
-          # KDE Breeze Dark Theme Default
-          cat <<'EOF' > config/includes.chroot/etc/xdg/kdeglobals
-          [KDE]
-          LookAndFeelPackage=org.kde.breezedark.desktop
-EOF
+          # KDE Theme Setup
+          echo "[KDE]" > config/includes.chroot/etc/xdg/kdeglobals
+          echo "LookAndFeelPackage=org.kde.breezedark.desktop" >> config/includes.chroot/etc/xdg/kdeglobals
 
-          # High FPS Window Animation Tweak
-          cat <<'EOF' > config/includes.chroot/etc/xdg/kwinrc
-          [org.kde.kdecoration2]
-          theme=org.kde.breezedark
-          [Compositing]
-          Enabled=true
-          AnimationSpeed=0
-          Backend=OpenGL
-          WindowsBlockCompositing=true
-EOF
+          # Window Tweaks Setup
+          echo "[org.kde.kdecoration2]" > config/includes.chroot/etc/xdg/kwinrc
+          echo "theme=org.kde.breezedark" >> config/includes.chroot/etc/xdg/kwinrc
+          echo "[Compositing]" >> config/includes.chroot/etc/xdg/kwinrc
+          echo "Enabled=true" >> config/includes.chroot/etc/xdg/kwinrc
+          echo "AnimationSpeed=0" >> config/includes.chroot/etc/xdg/kwinrc
+          echo "Backend=OpenGL" >> config/includes.chroot/etc/xdg/kwinrc
+          echo "WindowsBlockCompositing=true" >> config/includes.chroot/etc/xdg/kwinrc
 
-          # FASTFETCH COLORED ASCII LOGO SETUP (M = Blue, OS = Green)
+          # FASTFETCH ASCII LOGO VIA BASE64
           mkdir -p config/includes.chroot/etc/skel/.config/fastfetch
-          echo "G2VsY29tZSB0byBNT1M=" > /dev/null
-          echo -e "\e[36m   __  __  \e[32m ___  ____  \e[0m\n\e[36m  |  \/  | \e[32m/ _ \/ ___| \e[0m\n\e[36m  | |\/| | \e[32m| | | \___ \ \e[0m\n\e[36m  | |  | | \e[32m| |_| |___) |\e[0m\n\e[36m  |_|  |_| \e[32m\___/|____/ \e[0m" > config/includes.chroot/etc/skel/.config/fastfetch/mos.txt
+          echo "G2VsY29tZSB0byBNT1M=" | base64 -d > /dev/null
+          echo "IBtbMzZtICAgX18gIF9fICAbWzMybSAgX18gIF9fX18gIBtbMG0KIBtbMzZtICB8ICBcLyAgfCAbWzMybS8gXyBcLyBfX198IBtbMG0KIBtbMzZtICB8IHxcL3wgfCAbWzMybXwgfCB8IFxfX18gIBtbMG0KIBtbMzZtICB8IHwgIHwgfCAbWzMybXwgfF98IHwgX19fKSB8G1swbQogG1szNm0gIHxffCAgfF98IBtbMzJtIFxfX18vfF9fX18vIBtbMG0K" | base64 -d > config/includes.chroot/etc/skel/.config/fastfetch/mos.txt
 
-          # Fastfetch Config
-          cat <<'EOF' > config/includes.chroot/etc/skel/.config/fastfetch/config.jsonc
-{
-  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-  "logo": {
-    "type": "raw",
-    "source": "~/.config/fastfetch/mos.txt"
-  },
-  "modules": [
-    "title",
-    "separator",
-    "os",
-    "host",
-    "kernel",
-    "uptime",
-    "packages",
-    "shell",
-    "wm",
-    "memory",
-    "disk"
-  ]
-}
-EOF
+          # Fastfetch Config Setup
+          echo '{"$schema":"https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json","logo":{"type":"raw","source":"~/.config/fastfetch/mos.txt"},"modules":["title","separator","os","host","kernel","uptime","packages","shell","wm","memory","disk"]}' > config/includes.chroot/etc/skel/.config/fastfetch/config.jsonc
 
           # Auto-start Fastfetch on Konsole
           mkdir -p config/includes.chroot/etc/skel/
-          cat <<'EOF' >> config/includes.chroot/etc/skel/.bashrc
-if [ -f /usr/bin/fastfetch ]; then
-    fastfetch -c ~/.config/fastfetch/config.jsonc
-fi
-EOF
+          echo 'if [ -f /usr/bin/fastfetch ]; then fastfetch -c ~/.config/fastfetch/config.jsonc; fi' >> config/includes.chroot/etc/skel/.bashrc
 
           # Copy Theme Config to Skel
           mkdir -p config/includes.chroot/etc/skel/.config
           cp config/includes.chroot/etc/xdg/kdeglobals config/includes.chroot/etc/skel/.config/kdeglobals
           cp config/includes.chroot/etc/xdg/kwinrc config/includes.chroot/etc/skel/.config/kwinrc
 
-          # Wallpaper Setup (Using wallpaper.jpg from repository)
+          # Desktop Wallpaper Setup
           mkdir -p config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/
           wget -q -O config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png "https://raw.githubusercontent.com/mahim11184/M-OS/main/wallpaper.jpg" || echo "Wallpaper download skipped"
 
-          # Plasma Wallpaper Registry
-          cat <<'EOF' > config/includes.chroot/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
-[Containments][1]
-plugin=org.kde.plasma.folder
-wallpaperplugin=org.kde.image
+          # Wallpaper Registry Setup
+          echo "[Containments][1]" > config/includes.chroot/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
+          echo "plugin=org.kde.plasma.folder" >> config/includes.chroot/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
+          echo "wallpaperplugin=org.kde.image" >> config/includes.chroot/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
+          echo "[Containments][1][Wallpaper][org.kde.image][General]" >> config/includes.chroot/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
+          echo "Image=/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png" >> config/includes.chroot/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
 
-[Containments][1][Wallpaper][org.kde.image][General]
-Image=/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png
-EOF
-
-          # CALAMARES INSTALLATION SCREEN SETUP
+          # Calamares Branding Setup
           mkdir -p config/includes.chroot/etc/calamares/branding/mos
-          
-          # Calamares Branding Config
-          cat <<'EOF' > config/includes.chroot/etc/calamares/branding/mos/branding.desc
-componentName:  mos
-welcomeStyleCalamares: false
-welcomeExpandingWallpaper: true
-shortProductName: MOS
-version: 1.0
-shortVersion: 1.0
-versionedName: Mighty OS 1.0
-shortVersionedName: MOS 1.0
-productName: Mighty OS
-productUrl: https://github.com/mahim11184/M-OS
-supportUrl: https://github.com/mahim11184/M-OS
-style:
-  sidebarBackground: "#121318"
-  sidebarText: "#FFFFFF"
-  sidebarTextSelect: "#00d2ff"
-slideshow: "show.qml"
-EOF
+          echo "componentName: mos" > config/includes.chroot/etc/calamares/branding/mos/branding.desc
+          echo "welcomeStyleCalamares: false" >> config/includes.chroot/etc/calamares/branding/mos/branding.desc
+          echo "welcomeExpandingWallpaper: true" >> config/includes.chroot/etc/calamares/branding/mos/branding.desc
+          echo "shortProductName: MOS" >> config/includes.chroot/etc/calamares/branding/mos/branding.desc
+          echo "version: 1.0" >> config/includes.chroot/etc/calamares/branding/mos/branding.desc
+          echo "shortVersion: 1.0" >> config/includes.chroot/etc/calamares/branding/mos/branding.desc
+          echo "versionedName: Mighty OS 1.0" >> config/includes.chroot/etc/calamares/branding/mos/branding.desc
+          echo "shortVersionedName: MOS 1.0" >> config/includes.chroot/etc/calamares/branding/mos/branding.desc
+          echo "productName: Mighty OS" >> config/includes.chroot/etc/calamares/branding/mos/branding.desc
+          echo "productUrl: https://github.com/mahim11184/M-OS" >> config/includes.chroot/etc/calamares/branding/mos/branding.desc
+          echo "supportUrl: https://github.com/mahim11184/M-OS" >> config/includes.chroot/etc/calamares/branding/mos/branding.desc
+          echo "slideshow: show.qml" >> config/includes.chroot/etc/calamares/branding/mos/branding.desc
 
-          # Calamares Dark Slideshow QML
-          cat <<'EOF' > config/includes.chroot/etc/calamares/branding/mos/show.qml
-import QtQuick 2.0
-import calamares.slideshow 1.0
+          # Calamares Slideshow Setup
+          echo 'import QtQuick 2.0' > config/includes.chroot/etc/calamares/branding/mos/show.qml
+          echo 'import calamares.slideshow 1.0' >> config/includes.chroot/etc/calamares/branding/mos/show.qml
+          echo 'Presentation {' >> config/includes.chroot/etc/calamares/branding/mos/show.qml
+          echo '    id: presentation' >> config/includes.chroot/etc/calamares/branding/mos/show.qml
+          echo '    Timer { interval: 4000; running: true; repeat: true; onTriggered: presentation.goToNextSlide() }' >> config/includes.chroot/etc/calamares/branding/mos/show.qml
+          echo '    Slide { Text { anchors.centerIn: parent; text: "Welcome to Mighty OS (MOS)\n\nLightweight. High Performance. Pure Speed."; color: "#00d2ff"; font.pixelSize: 22; font.bold: true; horizontalAlignment: Text.AlignHCenter } }' >> config/includes.chroot/etc/calamares/branding/mos/show.qml
+          echo '    Slide { Text { anchors.centerIn: parent; text: "Optimized for Low-End & High-End PCs\n\nEnjoy smooth KDE Plasma Experience with ZRAM Tech."; color: "#ffffff"; font.pixelSize: 20; horizontalAlignment: Text.AlignHCenter } }' >> config/includes.chroot/etc/calamares/branding/mos/show.qml
+          echo '}' >> config/includes.chroot/etc/calamares/branding/mos/show.qml
 
-Presentation {
-    id: presentation
-
-    Timer {
-        interval: 4000
-        running: true
-        repeat: true
-        onTriggered: presentation.goToNextSlide()
-    }
-
-    Slide {
-        Text {
-            anchors.centerIn: parent
-            text: "Welcome to Mighty OS (MOS)\n\nLightweight. High Performance. Pure Speed."
-            color: "#00d2ff"
-            font.pixelSize: 22
-            font.bold: true
-            horizontalAlignment: Text.AlignHCenter
-        }
-    }
-
-    Slide {
-        Text {
-            anchors.centerIn: parent
-            text: "Optimized for Low-End & High-End PCs\n\nEnjoy smooth KDE Plasma Experience with ZRAM Tech."
-            color: "#ffffff"
-            font.pixelSize: 20
-            horizontalAlignment: Text.AlignHCenter
-        }
-    }
-}
-EOF
-
-          # GRUB Boot Background Config (Using boot.jpg from repository)
+          # GRUB Boot Background Setup
           mkdir -p config/includes.chroot/boot/grub/
           wget -q -O config/includes.chroot/boot/grub/mos-boot.jpg "https://raw.githubusercontent.com/mahim11184/M-OS/main/boot.jpg" || echo "Boot image download skipped"
 
           mkdir -p config/includes.chroot/etc/default/grub.d
-          cat <<'EOF' > config/includes.chroot/etc/default/grub.d/mos-theme.cfg
-GRUB_BACKGROUND="/boot/grub/mos-boot.jpg"
-GRUB_GFXMODE="1920x1080,auto"
-EOF
+          echo 'GRUB_BACKGROUND="/boot/grub/mos-boot.jpg"' > config/includes.chroot/etc/default/grub.d/mos-theme.cfg
+          echo 'GRUB_GFXMODE="1920x1080,auto"' >> config/includes.chroot/etc/default/grub.d/mos-theme.cfg
 
-          # Start Build Process
+          # Start ISO Construction
           lb build
 
       - name: Release MOS ISO
