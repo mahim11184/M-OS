@@ -85,13 +85,7 @@ EOF
 
           # FASTFETCH COLORED ASCII LOGO SETUP (M = Blue, OS = Green)
           mkdir -p config/includes.chroot/etc/skel/.config/fastfetch
-          cat <<'EOF' > config/includes.chroot/etc/skel/.config/fastfetch/mos.txt
-\u001b[36m   __  __  \u001b[32m ___  ____  \u001b[0m
-\u001b[36m  |  \/  | \u001b[32m/ _ \/ ___| \u001b[0m
-\u001b[36m  | |\/| | \u001b[32m| | | \___ \ \u001b[0m
-\u001b[36m  | |  | | \u001b[32m| |_| |___) |\u001b[0m
-\u001b[36m  |_|  |_| \u001b[32m\___/|____/ \u001b[0m
-EOF
+          printf '\033[36m   __  __  \033[32m ___  ____  \033[0m\n\033[36m  |  \\/  | \033[32m/ _ \\/ ___| \033[0m\n\033[36m  | |\\/| | \033[32m| | | \\___ \\ \033[0m\n\033[36m  | |  | | \033[32m| |_| |___) |\033[0m\n\033[36m  |_|  |_| \033[32m\\___/|____/ \033[0m\n' > config/includes.chroot/etc/skel/.config/fastfetch/mos.txt
 
           # Fastfetch Config
           cat <<'EOF' > config/includes.chroot/etc/skel/.config/fastfetch/config.jsonc
@@ -149,7 +143,6 @@ EOF
           
           # Calamares Branding Config
           cat <<'EOF' > config/includes.chroot/etc/calamares/branding/mos/branding.desc
----
 componentName:  mos
 welcomeStyleCalamares: false
 welcomeExpandingWallpaper: true
