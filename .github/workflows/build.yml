@@ -1,4 +1,4 @@
-name: Build MOS (Mighty OS) - Ultra Fixed
+name: Build MOS (Mighty OS) - Server Fixed
 
 on:
   workflow_dispatch:
@@ -14,14 +14,20 @@ jobs:
     - name: Set Up OS Build Environment
       run: |
         sudo apt-get update
-        sudo apt-get install -y live-build debootstrap systemd-container wget
+        sudo apt-get install -y live-build debootstrap systemd-container wget debian-archive-keyring
 
     - name: Configure and Compile MOS ISO
       run: |
-        # রুট ডিরেক্টরিতেই সরাসরি লাইভ বিল্ড কনফিগার করা (যাতে cd নিয়ে কোনো ঝামেলা না হয়)
-        sudo lb config --architectures amd64 --distribution bookworm --binary-images iso-hybrid --archive-areas "main contrib non-free non-free-firmware"
+        # ডেবিয়ানের অফিশিয়াল মিরর সার্ভার এবং কী-রিং পরিষ্কারভাবে চিনিয়ে দেওয়া (উবুন্টুর এরর দূর করতে)
+        sudo lb config --architectures amd64 \
+                       --distribution bookworm \
+                       --binary-images iso-hybrid \
+                       --archive-areas "main contrib non-free non-free-firmware" \
+                       --mirror-bootstrap "http://debian.org" \
+                       --mirror-chroot "http://debian.org" \
+                       --mirror-binary "http://debian.org"
         
-        # ৩ জিবির নিচে রাখার জন্য প্রয়োজনীয় প্যাকেজ লিস্ট
+        # ৩ জিবির নিচে রাখার জন্য প্রয়োজনীয় প্যাকেজ লিস্ট
         sudo mkdir -p config/package-lists
         sudo bash -c 'cat <<EOF > config/package-lists/mos-core.list.chroot
         xorg
@@ -78,11 +84,11 @@ jobs:
         Image=/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png
         EOF'
 
-        # সব কনফিগারেশন শেষে সরাসরি ওএস কম্পাইল শুরু (sudo দিয়ে)
+        # ডেবিয়ান সার্ভার থেকে ওএস ডাউনলোড ও কম্পাইল শুরু
         sudo lb build
 
     - name: Release MOS ISO
-      if: always() # ওএস তৈরি হোক বা না হোক, লগ ফাইল বা আইএসও আপলোড নিশ্চিত করতে
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: MOS-Mighty-Smooth-ISO
