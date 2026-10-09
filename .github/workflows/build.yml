@@ -1,0 +1,83 @@
+name: Build MOS (Mighty OS) - Neon Edition
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-mos:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout Blueprint
+      uses: actions/checkout@v4
+
+    - name: Set Up OS Build Environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y live-build debootstrap systemd-container
+
+    - name: Configure MOS Neon Customizations
+      run: |
+        mkdir -p build && cd build
+        lb config --architectures amd64 --distribution bookworm --binary-images iso-hybrid --archive-areas "main contrib non-free non-free-firmware"
+        
+        # ৩ জিবির নিচে লাইটওয়েট প্যাকেজ লিস্ট (৪জিবি র‍্যামের জন্য পারফেক্ট)
+        mkdir -p config/package-lists
+        cat <<EOF > config/package-lists/mos-core.list.chroot
+        xorg sddm plasma-desktop plasma-nm powerdevil kscreen
+        dolphin konsole calamares calamares-settings-debian
+        firefox-esr gwenview micro firefox-esr-l10n-bn
+        EOF
+
+        # HDD প্রো-টিপস: Baloo (সার্চ ইনডেক্সার) চিরতরে বন্ধ
+        mkdir -p config/includes.chroot/etc/xdg
+        cat <<EOF > config/includes.chroot/etc/xdg/baloofilerc
+        [Basic Settings]
+        Indexing-Enabled=false
+        EOF
+
+        # নিয়ন ডার্ক থিম এবং জিরো অ্যানিমেশন (হাই এফপিএস এর জন্য)
+        cat <<EOF > config/includes.chroot/etc/xdg/kdeglobals
+        [KDE]
+        LookAndFeelPackage=org.kde.breezedark.desktop
+        EOF
+
+        cat <<EOF > config/includes.chroot/etc/xdg/kwinrc
+        [org.kde.kdecoration2]
+        theme=org.kde.breezedark
+        [Compositing]
+        Enabled=true
+        AnimationSpeed=0
+        Backend=OpenGL
+        WindowsBlockCompositing=true
+        EOF
+
+        # ইউজারের জন্য নিয়ন ডার্ক থিম কপি করা
+        mkdir -p config/includes.chroot/etc/skel/.config
+        cp config/includes.chroot/etc/xdg/kdeglobals config/includes.chroot/etc/skel/.config/kdeglobals
+        cp config/includes.chroot/etc/xdg/kwinrc config/includes.chroot/etc/skel/.config/kwinrc
+
+        # আপনার জন্য জেনারেট করা MOS অফিশিয়াল নিয়ন ওয়ালপেপারটি সিস্টেমে যুক্ত করা
+        mkdir -p config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/
+        wget -O config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png "https://prodia.xyz"
+
+        # ওয়ালপেপার প্লাজমাতে ডিফল্ট হিসেবে সেট করা
+        cat <<EOF > config/includes.chroot/etc/skel/.config/plasma-org.kde.plasma.desktop-appletsrc
+        [Containments]
+        plugin=org.kde.plasma.folder
+        wallpaperplugin=org.kde.image
+        [Containments][Wallpaper][org.kde.image][General]
+        Image=/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png
+        EOF
+
+    - name: Compile MOS ISO
+      run: |
+        cd build
+        sudo lb build
+
+    - name: Release MOS ISO
+      uses: actions/upload-artifact@v4
+      with:
+        name: MOS-Mighty-Smooth-ISO
+        path: build/*.iso
+        compression-level: 0
