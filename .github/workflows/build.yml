@@ -1,0 +1,50 @@
+name: Build MOS (Mighty OS)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-mos:
+    runs-on: ubuntu-24.04
+
+    container:
+      image: debian:bookworm
+      options: --privileged
+
+    steps:
+      - name: Install Base Tools inside Debian
+        run: |
+          apt-get update
+          apt-get install -y live-build debootstrap wget git coreutils xz-utils
+
+      - name: Checkout Repository Files
+        uses: actions/checkout@v4
+
+      - name: Setup System Resources & Images
+        run: |
+          # Create required directories inside live-build config tree
+          mkdir -p config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/
+          mkdir -p config/includes.chroot/boot/grub/
+
+          # Copy images to target locations
+          cp wallpaper.jpg config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png || echo "Wallpaper copy skipped"
+          cp boot.jpg config/includes.chroot/boot/grub/mos-boot.jpg || echo "Boot image copy skipped"
+
+      - name: Compile MOS ISO
+        run: |
+          lb config --architectures amd64 \
+                    --distribution bookworm \
+                    --binary-images iso-hybrid \
+                    --archive-areas "main contrib non-free non-free-firmware"
+          lb build
+
+      - name: Release MOS ISO
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MOS-Mighty-Smooth-ISO
+          path: "*.iso"
+          compression-level: 0
