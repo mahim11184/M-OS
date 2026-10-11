@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=MATE with Openbox
+Comment=MATE Desktop Environment managed by Openbox
+Exec=env XDG_CURRENT_DESKTOP=MATE mate-session --window-manager=openbox
+Type=Application
+DesktopNames=MATE
