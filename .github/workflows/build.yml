@@ -23,15 +23,20 @@ jobs:
       - name: Checkout Repository Files
         uses: actions/checkout@v4
 
-      - name: Setup System Resources & Images
+      - name: Setup System Resources & Images from Assets Folder
         run: |
-          # Create required directories inside live-build config tree
-          mkdir -p config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/
+          # Create required system directories
+          mkdir -p config/includes.chroot/usr/share/backgrounds/mos/
           mkdir -p config/includes.chroot/boot/grub/
 
-          # Copy images to target locations
-          cp wallpaper.jpg config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png || echo "Wallpaper copy skipped"
-          cp boot.jpg config/includes.chroot/boot/grub/mos-boot.jpg || echo "Boot image copy skipped"
+          # Copy wallpapers from the assets folder
+          cp assets/wallpaper.jpg config/includes.chroot/usr/share/backgrounds/mos/default.jpg || true
+          cp assets/bg1.jpg config/includes.chroot/usr/share/backgrounds/mos/bg1.jpg || true
+          cp assets/bg2.jpg config/includes.chroot/usr/share/backgrounds/mos/bg2.jpg || true
+          cp assets/bg3.jpg config/includes.chroot/usr/share/backgrounds/mos/bg3.jpg || true
+
+          # Copy Boot image from the assets folder
+          cp assets/boot.jpg config/includes.chroot/boot/grub/mos-boot.jpg || true
 
       - name: Enable Flathub Setup Service
         run: |
