@@ -1,10 +1,11 @@
 xorg
 lightdm
-mate-desktop-environment-core
+xfce4-session
+xfce4-panel
 openbox
 obconf
-caja
-mate-terminal
+thunar
+xfce4-terminal
 ark
 calamares
 calamares-settings-debian
