@@ -25,3 +25,6 @@ zram-tools
 tlp
 preload
 pipewire-audio
+flatpak
+desktop-file-utils
+xfce4-whiskermenu-plugin
