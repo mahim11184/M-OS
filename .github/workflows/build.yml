@@ -33,6 +33,11 @@ jobs:
           cp wallpaper.jpg config/includes.chroot/usr/share/wallpapers/mos-neon/contents/images/1920x1080.png || echo "Wallpaper copy skipped"
           cp boot.jpg config/includes.chroot/boot/grub/mos-boot.jpg || echo "Boot image copy skipped"
 
+      - name: Enable Flathub Setup Service
+        run: |
+          mkdir -p config/includes.chroot/etc/systemd/system/multi-user.target.wants/
+          ln -s /etc/systemd/system/flatpak-flathub-setup.service config/includes.chroot/etc/systemd/system/multi-user.target.wants/flatpak-flathub-setup.service
+
       - name: Compile MOS ISO
         run: |
           lb config --architectures amd64 \
