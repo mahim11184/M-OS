@@ -1,56 +1,61 @@
 <div align="center">
 
-# 🌌 Mighty OS (MOS)
-### *The Ultimate Lightweight, Zorin-Inspired Debian Experience*
+# 🌌 Mighty Linux by MOS
+### *A Modular, Lightweight, and Modern Debian-Based Linux Distribution*
 
 [![Debian Bookworm](https://img.shields.io/badge/Base-Debian%20Bookworm-A81D33?style=flat-square&logo=debian)](https://www.debian.org/)
 [![Desktop Environment](https://img.shields.io/badge/DE-XFCE%20%2B%20Openbox-1E1E2E?style=flat-square&logo=xfce)](https://xfce.org/)
-[![Status](https://img.shields.io/badge/Status-Alpha%20v0.1-orange?style=flat-square)]()
-[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)]()
+[![Release](https://img.shields.io/badge/Release-v1.0.0-success?style=flat-square)]()
+[![Made in Bangladesh](https://img.shields.io/badge/Made%20in-Bangladesh%20%F0%9F%87%BD%F0%9F%87%BD-green?style=flat-square)]()
 
 </div>
 
 ---
 
-## 🚀 About Mighty OS (MOS)
+## 🚀 About Mighty Linux (MOS)
 
-**Mighty OS (MOS)** is a custom, modular, ultra-lightweight Linux distribution built on top of **Debian Bookworm**. It combines the lightning-fast performance and stability of a custom **XFCE + Openbox** window manager setup with the sleek, modern aesthetic of **Zorin OS Lite**. 
+**Mighty Linux (MOS)** is an ultra-lightweight, high-performance Linux distribution built on top of **Debian Bookworm**. It combines the stability of Debian with a highly customized **XFCE + Openbox** window manager setup to deliver a modern, fast, and responsive user experience right out of the box.
 
-Designed for users who want a gorgeous, out-of-the-box ready desktop environment without the bloatware.
-
----
-
-## ✨ Key Features
-
-- 🎨 **Zorin OS Lite Aesthetic:** Custom dark GTK3 CSS styling, modern rounded corners, and a polished, central grid **Whisker Menu**.
-- ⚡ **Ultra-Lightweight & Fast:** Optimized memory footprint and core resource management, perfect for both old and modern hardware.
-- 📦 **Flatpak & Flathub Ready:** Out-of-the-box Flatpak support with an automated `systemd` service that sets up Flathub on your first boot.
-- 🧰 **Pre-Configured Essentials:** Comes packed with LibreOffice, VLC Media Player, Falkon Browser, Geany, GParted, Neovim, Btop, and Fastfetch.
-- 🌐 **Comprehensive Driver Support:** Includes broad out-of-the-box firmware for Realtek, Intel/AMD graphics, Wi-Fi adapters (`iwlwifi`, `atheros`), Vulkan drivers, and audio support.
-- 🖼️ **Modular Design:** Clean project repository structure with a dedicated `assets/` folder for wallpapers, themes, and boot graphics handled via automated GitHub Actions.
+Designed for modern hardware as well as older devices without compromising on style or functionality.
 
 ---
 
-## 🛠️ System Stack & Components
+## ✨ Key Highlights
 
-| Component | Technology |
-| :--- | :--- |
-| **Base OS** | Debian 12 (Bookworm) |
-| **Window Manager / DE** | XFCE Core + Openbox |
-| **Menu Launcher** | Whisker Menu (`xfce4-whiskermenu-plugin`) |
-| **Display Manager** | LightDM |
-| **Installer** | Calamares (Dark Theme Integrated) |
-| **Audio Server** | PipeWire |
+- 🎨 **Sleek Interface:** Custom GTK3 CSS dark theme, rounded window styling, and an intuitive **Whisker Menu**.
+- ⚡ **Ultra-Fast & Resource-Efficient:** Minimal background footprint powered by XFCE core components and Openbox.
+- 📦 **Flatpak & Flathub Integrated:** Built-in Flatpak support with auto-enabling Flathub service on first boot.
+- 🧰 **Pre-loaded Productivity Tools:** Includes LibreOffice Suite, VLC Media Player, Falkon Browser, Geany, Neovim, Btop, GParted, and Fastfetch.
+- 🌐 **Comprehensive Driver Coverage:** Pre-installed firmware for Realtek, Intel/AMD graphics, Wi-Fi adapters (`iwlwifi`, `atheros`), Vulkan acceleration, and PipeWire audio.
+- 🛠️ **Automated CI/CD Pipeline:** ISO builds are compiled automatically via GitHub Actions workflows.
 
 ---
 
-## 📂 Project Structure
+## 📂 Project Architecture & File Breakdown
+
+Here is an overview of what each directory and critical file inside this repository contains:
 
 ```text
 M-OS/
-├── assets/                 # Wallpapers, boot splash, and images
+├── .gitattributes                                  # Git file normalization & LFS rules
+├── README.md                                       # Documentation & repository summary
+├── assets/                                         # Wallpapers, splash graphics, and boot images
+│   ├── wallpaper.jpg                               # Primary system wallpaper
+│   ├── bg1.jpg, bg2.jpg, bg3.jpg                    # Alternative bundled backgrounds
+│   └── boot.jpg                                    # GRUB bootloader background
 ├── .github/
-│   └── workflows/          # Automated GitHub Actions build & release pipeline
+│   └── workflows/
+│       └── build.yml                               # GitHub Actions pipeline for live-build & ISO releases
 └── config/
-    ├── package-lists/      # Debian live-build package definitions
-    └── includes.chroot/    # System configuration files, themes, and services
+    ├── package-lists/
+    │   └── mos-core.list.chroot                    # List of system packages, drivers, and apps to install
+    └── includes.chroot/
+        └── etc/
+            ├── systemd/system/
+            │   └── flatpak-flathub-setup.service   # Systemd service to auto-add Flathub repository
+            └── skel/                               # Default home settings for new users
+                ├── .bashrc                         # Custom terminal launch settings (Fastfetch startup)
+                └── .config/
+                    ├── gtk-3.0/gtk.css             # Zorin-inspired dark UI styling
+                    ├── xfce4/panel/whiskermenu-1.rc # Whisker Menu layout configuration
+                    └── fastfetch/config.jsonc      # Custom system info output layout
