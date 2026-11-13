@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Mighty Linux
+Description=Mighty Linux animated boot splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/mighty-linux
+ScriptFile=/usr/share/plymouth/themes/mighty-linux/mighty-linux.script
