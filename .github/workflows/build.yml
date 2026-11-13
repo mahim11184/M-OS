@@ -92,6 +92,7 @@ jobs:
           lb build
 
       - name: Generate SHA-256 checksums
+        shell: bash
         run: |
           set -e
           shopt -s nullglob
@@ -109,21 +110,21 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Publish versioned prerelease
+      - name: Publish Mighty Linux Beta release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "v1.1.0-build-${{ github.run_number }}"
-          name: "Mighty Linux 1.1.0 — build ${{ github.run_number }}"
+          tag_name: "v1.0.0-beta.${{ github.run_number }}"
+          name: "Mighty Linux Beta 1.0.0 (Build ${{ github.run_number }})"
           body: |
-            Automated Mighty Linux alpha build based on Debian Bookworm.
+            Automated Mighty Linux Beta build based on Debian 12 (Bookworm). This is a Beta release and may still contain bugs.
 
             Desktop: XFCE + Openbox
             Application formats: DEB, Flatpak, AppImage
             Architecture: amd64
 
             See SHA256SUMS to verify the ISO download.
-          prerelease: true
+          prerelease: false
           files: |
             *.iso
             SHA256SUMS
