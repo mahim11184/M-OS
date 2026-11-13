@@ -1,0 +1,36 @@
+# Mighty Linux Plymouth script theme
+Window.SetBackgroundTopColor(0.025, 0.035, 0.085);
+Window.SetBackgroundBottomColor(0.010, 0.015, 0.045);
+
+# Use Mahim's existing boot artwork as the centered splash image.
+boot_image = Image("boot.jpg");
+boot_sprite = Sprite(boot_image);
+boot_sprite.SetX(Window.GetWidth() / 2 - boot_image.GetWidth() / 2);
+boot_sprite.SetY(Window.GetHeight() / 2 - boot_image.GetHeight() / 2);
+boot_sprite.SetZ(-100);
+
+# Animated four-frame loop, using characters available in DejaVu Sans.
+spinner_images = [];
+spinner_images[0] = Image.Text("|", 0.05, 0.78, 1.0, 1.0, "DejaVu Sans");
+spinner_images[1] = Image.Text("/", 0.05, 0.78, 1.0, 1.0, "DejaVu Sans");
+spinner_images[2] = Image.Text("-", 0.05, 0.78, 1.0, 1.0, "DejaVu Sans");
+spinner_images[3] = Image.Text("\\", 0.05, 0.78, 1.0, 1.0, "DejaVu Sans");
+
+spinner_sprite = Sprite(spinner_images[0]);
+spinner_sprite.SetZ(100);
+spinner_sprite.SetX(Window.GetWidth() / 2 - spinner_images[0].GetWidth() / 2);
+spinner_sprite.SetY(Window.GetHeight() - spinner_images[0].GetHeight() * 4);
+
+label_image = Image.Text("Starting Mighty Linux...", 0.78, 0.84, 1.0, 1.0, "DejaVu Sans");
+label_sprite = Sprite(label_image);
+label_sprite.SetZ(100);
+label_sprite.SetX(Window.GetWidth() / 2 - label_image.GetWidth() / 2);
+label_sprite.SetY(Window.GetHeight() - label_image.GetHeight() * 2);
+
+frame = 0;
+fun refresh_callback()
+{
+    frame++;
+    spinner_sprite.SetImage(spinner_images[Math.Int(frame / 5) % 4]);
+}
+Plymouth.SetRefreshFunction(refresh_callback);
