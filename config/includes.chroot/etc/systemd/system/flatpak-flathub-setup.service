@@ -1,0 +1,13 @@
+[Unit]
+Description=Enable the Flathub repository for Mighty Linux
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=/usr/bin/flatpak
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/flatpak remote-add --system --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
