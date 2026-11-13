@@ -1,4 +1,4 @@
-# Auto-run Fastfetch on terminal launch
-if [ -x "$(command -v fastfetch)" ]; then
-    fastfetch
+# Show Mighty Linux system details in interactive terminals
+if [ -n "$PS1" ] && command -v neofetch >/dev/null 2>&1; then
+    neofetch
 fi

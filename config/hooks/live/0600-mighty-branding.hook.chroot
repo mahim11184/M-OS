@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+
+# Select the custom splash and rebuild initramfs so the theme is available at boot.
+if command -v plymouth-set-default-theme >/dev/null 2>&1; then
+    plymouth-set-default-theme -R mighty-linux
+elif command -v update-initramfs >/dev/null 2>&1; then
+    update-initramfs -u -k all
+fi

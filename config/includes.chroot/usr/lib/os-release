@@ -1,0 +1,11 @@
+NAME="Mighty Linux"
+PRETTY_NAME="Mighty Linux 1.1 (Debian Bookworm)"
+ID=mightylinux
+ID_LIKE=debian
+VERSION_ID="1.1"
+VERSION="1.1 (Bookworm)"
+VERSION_CODENAME=bookworm
+DEBIAN_CODENAME=bookworm
+HOME_URL="https://github.com/mahim11184/M-OS"
+SUPPORT_URL="https://github.com/mahim11184/M-OS/issues"
+BUG_REPORT_URL="https://github.com/mahim11184/M-OS/issues"
