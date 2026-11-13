@@ -37,7 +37,7 @@ jobs:
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             live-build debootstrap xorriso squashfs-tools \
             grub-pc-bin grub-efi-amd64-bin mtools dosfstools \
-            isolinux syslinux-common ca-certificates wget git xz-utils gnupg
+            isolinux syslinux-common ca-certificates wget git xz-utils gnupg python3
 
       - name: Stage Mighty Linux artwork
         shell: bash
