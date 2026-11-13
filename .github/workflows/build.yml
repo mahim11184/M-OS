@@ -1,62 +1,128 @@
-name: Build MOS (Mighty OS)
+name: Build Mighty Linux ISO
 
 on:
   workflow_dispatch:
   push:
     branches:
       - main
+      - "fix/**"
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
 
+concurrency:
+  group: mighty-linux-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build-mos:
+  build:
+    name: Build Debian Bookworm live ISO
     runs-on: ubuntu-24.04
+    timeout-minutes: 180
 
     container:
       image: debian:bookworm
       options: --privileged
 
     steps:
-      - name: Install Base Tools inside Debian
-        run: |
-          apt-get update
-          apt-get install -y live-build debootstrap wget git coreutils xz-utils
-
-      - name: Checkout Repository Files
+      - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Setup System Resources & Images from Assets Folder
+      - name: Install live-build dependencies
         run: |
-          mkdir -p config/includes.chroot/usr/share/backgrounds/mos/
-          mkdir -p config/includes.chroot/boot/grub/
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            live-build debootstrap xorriso squashfs-tools \
+            grub-pc-bin grub-efi-amd64-bin mtools dosfstools \
+            isolinux syslinux-common ca-certificates wget git xz-utils gnupg
 
-          cp assets/wallpaper.jpg config/includes.chroot/usr/share/backgrounds/mos/default.jpg || true
-          cp assets/bg1.jpg config/includes.chroot/usr/share/backgrounds/mos/bg1.jpg || true
-          cp assets/bg2.jpg config/includes.chroot/usr/share/backgrounds/mos/bg2.jpg || true
-          cp assets/bg3.jpg config/includes.chroot/usr/share/backgrounds/mos/bg3.jpg || true
-          cp assets/boot.jpg config/includes.chroot/boot/grub/mos-boot.jpg || true
-
-      - name: Enable Flathub Setup Service
+      - name: Stage Mighty Linux artwork
+        shell: bash
         run: |
-          mkdir -p config/includes.chroot/etc/systemd/system/multi-user.target.wants/
-          ln -s /etc/systemd/system/flatpak-flathub-setup.service config/includes.chroot/etc/systemd/system/multi-user.target.wants/flatpak-flathub-setup.service
+          set -euo pipefail
+          install -D -m 0644 wallpaper.jpg \
+            config/includes.chroot/usr/share/backgrounds/mighty-linux/wallpaper.jpg
 
-      - name: Compile MOS ISO
+          mkdir -p config/includes.chroot/usr/share/backgrounds/mighty-linux
+          shopt -s nullglob
+          for image in assets/bg*.jpg assets/bg*.png; do
+            install -m 0644 "$image" \
+              "config/includes.chroot/usr/share/backgrounds/mighty-linux/$(basename "$image")"
+          done
+
+          install -D -m 0644 assets/boot.jpg \
+            config/includes.chroot/usr/share/plymouth/themes/mighty-linux/boot.jpg
+          install -D -m 0644 assets/boot.jpg \
+            config/includes.chroot/boot/grub/mighty-linux.jpg
+
+      - name: Enable first-boot Flathub setup
         run: |
-          lb config --architectures amd64 \
-                    --distribution bookworm \
-                    --binary-images iso-hybrid \
-                    --archive-areas "main contrib non-free non-free-firmware"
+          mkdir -p config/includes.chroot/etc/systemd/system/multi-user.target.wants
+          ln -sfn ../flatpak-flathub-setup.service \
+            config/includes.chroot/etc/systemd/system/multi-user.target.wants/flatpak-flathub-setup.service
+
+      - name: Validate build configuration
+        run: |
+          test -s config/package-lists/mos-core.list.chroot
+          test -s config/includes.chroot/etc/systemd/system/flatpak-flathub-setup.service
+          test -s config/includes.chroot/usr/share/plymouth/themes/mighty-linux/mighty-linux.plymouth
+          test -s config/includes.chroot/usr/share/plymouth/themes/mighty-linux/mighty-linux.script
+          test -s config/includes.chroot/usr/share/plymouth/themes/mighty-linux/boot.jpg
+          grep -qx 'libfuse2' config/package-lists/mos-core.list.chroot
+          grep -qx 'flatpak' config/package-lists/mos-core.list.chroot
+
+      - name: Configure and build hybrid ISO
+        run: |
+          lb config \
+            --architectures amd64 \
+            --distribution bookworm \
+            --binary-images iso-hybrid \
+            --archive-areas "main contrib non-free non-free-firmware" \
+            --image-name mighty-linux \
+            --iso-application "Mighty Linux" \
+            --iso-publisher "Mighty Linux by MOS" \
+            --iso-volume "MIGHTY_LINUX" \
+            --bootappend-live "boot=live components quiet splash"
           lb build
 
-      - name: Create Automatic GitHub Release
+      - name: Generate SHA-256 checksums
+        run: |
+          set -e
+          shopt -s nullglob
+          images=( *.iso )
+          test "${#images[@]}" -gt 0
+          sha256sum "${images[@]}" > SHA256SUMS
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mighty-linux-iso
+          path: |
+            *.iso
+            SHA256SUMS
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish versioned prerelease
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.1-alpha
-          name: "M-OS LINUX v0.1 alpha (may be unstable)"
-          body: "Initial alpha build for Mighty OS (MOS)."
+          tag_name: "v1.1.0-build-${{ github.run_number }}"
+          name: "Mighty Linux 1.1.0 — build ${{ github.run_number }}"
+          body: |
+            Automated Mighty Linux alpha build based on Debian Bookworm.
+
+            Desktop: XFCE + Openbox
+            Application formats: DEB, Flatpak, AppImage
+            Architecture: amd64
+
+            See SHA256SUMS to verify the ISO download.
           prerelease: true
-          files: "*.iso"
+          files: |
+            *.iso
+            SHA256SUMS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
