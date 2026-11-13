@@ -27,7 +27,7 @@
 
 ## 🖥️ Desktop design
 
-The desktop uses a dark Arc theme and Papirus icons, with a bottom panel intended to be familiar to Windows users. The interface is built from XFCE components so users can change themes, panel position, icons, and shortcuts instead of being locked into a custom shell.
+The desktop uses a dark Arc theme and Adwaita icons, with a bottom panel intended to be familiar to Windows users. The interface is built from XFCE components so users can change themes, panel position, icons, and shortcuts instead of being locked into a custom shell.
 
 ## 📦 Software support
 
