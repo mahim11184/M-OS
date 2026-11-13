@@ -1,61 +1,115 @@
 <div align="center">
 
-# 🌌 Mighty Linux by MOS
-### *A Modular, Lightweight, and Modern Debian-Based Linux Distribution*
+# 🌌 Mighty Linux
+### *A lightweight, Windows-inspired Debian desktop by MOS*
 
-[![Debian Bookworm](https://img.shields.io/badge/Base-Debian%20Bookworm-A81D33?style=flat-square&logo=debian)](https://www.debian.org/)
-[![Desktop Environment](https://img.shields.io/badge/DE-XFCE%20%2B%20Openbox-1E1E2E?style=flat-square&logo=xfce)](https://xfce.org/)
-[![Release](https://img.shields.io/badge/Release-v1.0.0-success?style=flat-square)]()
-[![Made in Bangladesh](https://img.shields.io/badge/Made%20in-Bangladesh%20%F0%9F%87%BD%F0%9F%87%BD-green?style=flat-square)]()
+[![Base](https://img.shields.io/badge/Base-Debian%2012%20Bookworm-A81D33?style=flat-square&logo=debian)](https://www.debian.org/)
+[![Desktop](https://img.shields.io/badge/Desktop-XFCE%20%2B%20Openbox-2284A1?style=flat-square&logo=xfce)]
+[![Architecture](https://img.shields.io/badge/Architecture-amd64-blue?style=flat-square)]
+[![Formats](https://img.shields.io/badge/Apps-DEB%20%7C%20Flatpak%20%7C%20AppImage-39A96B?style=flat-square)]
+[![Made in Bangladesh](https://img.shields.io/badge/Made%20in-Bangladesh%20🇧🇩-green?style=flat-square)]
+
+**Mighty Linux (MOS)** is a Debian-based desktop operating system designed to feel familiar to Windows users while staying lightweight, practical, and customizable. Its visual direction takes inspiration from Linux Mint and Zorin OS, without copying either distribution.
 
 </div>
 
 ---
 
-## 🚀 About Mighty Linux (MOS)
+## ✨ The Mighty Linux experience
 
-**Mighty Linux (MOS)** is an ultra-lightweight, high-performance Linux distribution built on top of **Debian Bookworm**. It combines the stability of Debian with a highly customized **XFCE + Openbox** window manager setup to deliver a modern, fast, and responsive user experience right out of the box.
+- **Familiar desktop:** XFCE with a Windows-style bottom panel, Whisker application menu, task buttons, system tray, volume control, and clock.
+- **Lightweight foundation:** XFCE and Openbox keep the desktop simpler than a full heavyweight desktop environment.
+- **Custom identity:** Mighty Linux wallpaper collection, GRUB background, LightDM greeter styling, and a custom animated Plymouth boot theme.
+- **Three application formats:** Debian `.deb` packages, Flatpak/Flathub, and AppImages with FUSE 2 compatibility.
+- **Everyday tools:** Falkon, VLC, LibreOffice, Geany, Neovim, GParted, Fastfetch, and Btop.
+- **Hardware support:** Debian firmware packages for common Intel, AMD, Realtek, Atheros, and Intel Wi-Fi/audio hardware.
+- **Installer:** Calamares packages are included in the image.
 
-Designed for modern hardware as well as older devices without compromising on style or functionality.
+## 🖥️ Desktop design
 
----
+The desktop uses a dark Arc theme and Papirus icons, with a bottom panel intended to be familiar to Windows users. The interface is built from XFCE components so users can change themes, panel position, icons, and shortcuts instead of being locked into a custom shell.
 
-## ✨ Key Highlights
+## 📦 Software support
 
-- 🎨 **Sleek Interface:** Custom GTK3 CSS dark theme, rounded window styling, and an intuitive **Whisker Menu**.
-- ⚡ **Ultra-Fast & Resource-Efficient:** Minimal background footprint powered by XFCE core components and Openbox.
-- 📦 **Flatpak & Flathub Integrated:** Built-in Flatpak support with auto-enabling Flathub service on first boot.
-- 🧰 **Pre-loaded Productivity Tools:** Includes LibreOffice Suite, VLC Media Player, Falkon Browser, Geany, Neovim, Btop, GParted, and Fastfetch.
-- 🌐 **Comprehensive Driver Coverage:** Pre-installed firmware for Realtek, Intel/AMD graphics, Wi-Fi adapters (`iwlwifi`, `atheros`), Vulkan acceleration, and PipeWire audio.
-- 🛠️ **Automated CI/CD Pipeline:** ISO builds are compiled automatically via GitHub Actions workflows.
+| Format | Support |
+|---|---|
+| `.deb` | APT, GDebi, and Synaptic |
+| Flatpak | Flatpak is installed; Flathub is added automatically after the first boot when networking is available |
+| AppImage | FUSE 2 compatibility library and FUSE 3 are included; mark an AppImage executable before launching it |
 
----
+AppImages are third-party application bundles. Compatibility still depends on the AppImage's architecture and the libraries it expects.
 
-## 📂 Project Architecture & File Breakdown
+## 💽 HDD and older-computer focus
 
-Here is an overview of what each directory and critical file inside this repository contains:
+Mighty Linux uses a comparatively light XFCE desktop and enables zram support to help systems under memory pressure. It is designed to install and run from a traditional hard drive; an SSD will still feel faster, and demanding browsers or applications can use substantial RAM on any desktop operating system.
+
+The build currently targets **64-bit x86 (amd64)**. Hardware support depends on the device and its firmware; this project does not claim that every old PC or graphics adapter is supported.
+
+## 🚀 Custom boot and wallpaper
+
+- The main desktop wallpaper is `wallpaper.jpg` in the repository root.
+- Additional desktop backgrounds are stored in `assets/`.
+- `assets/boot.jpg` is used for the GRUB background and the Mighty Linux Plymouth splash.
+- The Plymouth script cycles a four-frame spinner while the system boots.
+
+## 🧱 Technology
+
+| Component | Choice |
+|---|---|
+| Base | Debian 12 (Bookworm) |
+| Desktop session | XFCE |
+| Window manager | Openbox (started within the XFCE session) |
+| Display manager | LightDM + GTK greeter |
+| Application formats | APT/DEB, Flatpak, AppImage |
+| Boot splash | Plymouth |
+| Installer | Calamares |
+| Image builder | Debian Live Build |
+| Architecture | amd64 |
+
+## 🛠️ Building the ISO
+
+The GitHub Actions workflow builds the live ISO from the Debian Bookworm configuration.
+
+1. Open the repository's **Actions** tab.
+2. Select **Build Mighty Linux ISO**.
+3. Select **Run workflow** for a manual build, or push a change to `main`.
+4. Download the `mighty-linux-iso` workflow artifact. Builds on `main` also publish a versioned prerelease with a SHA-256 checksum.
+
+To build locally on a Debian Bookworm machine, install `live-build`, `debootstrap`, `xorriso`, and `squashfs-tools`, then run:
+
+```bash
+sudo lb config \
+  --architectures amd64 \
+  --distribution bookworm \
+  --binary-images iso-hybrid \
+  --archive-areas "main contrib non-free non-free-firmware" \
+  --image-name mighty-linux
+sudo lb build
+```
+
+## 📁 Repository layout
 
 ```text
 M-OS/
-├── .gitattributes                                  # Git file normalization & LFS rules
-├── README.md                                       # Documentation & repository summary
-├── assets/                                         # Wallpapers, splash graphics, and boot images
-│   ├── wallpaper.jpg                               # Primary system wallpaper
-│   ├── bg1.jpg, bg2.jpg, bg3.jpg                    # Alternative bundled backgrounds
-│   └── boot.jpg                                    # GRUB bootloader background
-├── .github/
-│   └── workflows/
-│       └── build.yml                               # GitHub Actions pipeline for live-build & ISO releases
-└── config/
-    ├── package-lists/
-    │   └── mos-core.list.chroot                    # List of system packages, drivers, and apps to install
-    └── includes.chroot/
-        └── etc/
-            ├── systemd/system/
-            │   └── flatpak-flathub-setup.service   # Systemd service to auto-add Flathub repository
-            └── skel/                               # Default home settings for new users
-                ├── .bashrc                         # Custom terminal launch settings (Fastfetch startup)
-                └── .config/
-                    ├── gtk-3.0/gtk.css             # Zorin-inspired dark UI styling
-                    ├── xfce4/panel/whiskermenu-1.rc # Whisker Menu layout configuration
-                    └── fastfetch/config.jsonc      # Custom system info output layout
+├── .github/workflows/build.yml
+├── assets/                         # Wallpaper collection and boot artwork
+├── wallpaper.jpg                   # Default desktop wallpaper
+├── config/
+│   ├── package-lists/              # Debian Live Build package lists
+│   ├── includes.chroot/            # Files copied into the live filesystem
+│   │   ├── etc/                    # Branding, services, desktop defaults
+│   │   ├── usr/lib/os-release      # Mighty Linux operating-system identity
+│   │   └── usr/share/plymouth/     # Custom animated boot theme
+│   └── hooks/live/                 # Build-time chroot hooks
+└── README.md
+```
+
+## ⚠️ Project status
+
+Mighty Linux is an independent community project and is still under active development. Test the live ISO on a spare machine or in a virtual machine before installing it on a computer containing important data. Back up your files before repartitioning a disk.
+
+Mighty Linux is not affiliated with or endorsed by Debian, Linux Mint, or Zorin OS.
+
+---
+
+**Made in Bangladesh 🇧🇩**
