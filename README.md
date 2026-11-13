@@ -73,7 +73,7 @@ The GitHub Actions workflow builds the live ISO from the Debian Bookworm configu
 1. Open the repository's **Actions** tab.
 2. Select **Build Mighty Linux ISO**.
 3. Select **Run workflow** for a manual build, or push a change to `main`.
-4. Download the `mighty-linux-iso` workflow artifact. Builds on `main` also publish a versioned prerelease with a SHA-256 checksum.
+4. Download the `mighty-linux-iso` workflow artifact. Successful builds pushed to `main` automatically publish a normal GitHub Beta release (not marked as a prerelease), with the ISO and SHA-256 checksum.
 
 To build locally on a Debian Bookworm machine, install `live-build`, `debootstrap`, `xorriso`, and `squashfs-tools`, then run:
 
@@ -103,9 +103,9 @@ M-OS/
 └── README.md
 ```
 
-## ⚠️ Project status
+## 🧪 Project status
 
-Mighty Linux is an independent community project and is still under active development. Test the live ISO on a spare machine or in a virtual machine before installing it on a computer containing important data. Back up your files before repartitioning a disk.
+Mighty Linux is an independent community project in **Beta**. It is still under active development and may contain bugs. Test the live ISO on a spare machine or in a virtual machine before installing it on a computer containing important data. Back up your files before repartitioning a disk.
 
 Mighty Linux is not affiliated with or endorsed by Debian, Linux Mint, or Zorin OS.
 
