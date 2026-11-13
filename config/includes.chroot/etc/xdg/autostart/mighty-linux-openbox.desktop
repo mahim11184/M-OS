@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Mighty Linux Openbox
+Comment=Lightweight Mighty Linux window manager
+Exec=openbox --replace
+OnlyShowIn=XFCE;
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
