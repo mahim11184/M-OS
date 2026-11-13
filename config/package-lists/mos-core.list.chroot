@@ -34,7 +34,7 @@ accountsservice
 
 # Desktop appearance and fonts
 arc-theme
-papirus-icon-theme
+adwaita-icon-theme
 fonts-dejavu-core
 fonts-cantarell
 fonts-noto-color-emoji
@@ -84,7 +84,7 @@ falkon
 geany
 neovim
 btop
-fastfetch
+neofetch
 htop
 gparted
 ffmpeg
