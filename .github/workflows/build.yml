@@ -74,6 +74,9 @@ jobs:
           grep -qx 'libfuse2' config/package-lists/mos-core.list.chroot
           grep -qx 'flatpak' config/package-lists/mos-core.list.chroot
 
+      - name: Make live-build hooks executable
+        run: chmod +x config/hooks/live/*.hook.chroot
+
       - name: Configure and build hybrid ISO
         run: |
           lb config \
