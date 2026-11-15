@@ -19,9 +19,9 @@
 
 - **Familiar desktop:** XFCE with a Windows-style bottom panel, Whisker application menu, task buttons, system tray, volume control, and clock.
 - **Lightweight foundation:** XFCE and Openbox keep the desktop simpler than a full heavyweight desktop environment.
-- **Custom identity:** Mighty Linux wallpaper collection, GRUB background, LightDM greeter styling, and a custom animated Plymouth boot theme.
+- **Custom identity:** Mighty Linux wallpaper collection, GRUB background, LightDM greeter styling, an explicitly configured graphical login, and a custom animated Plymouth boot theme.
 - **Three application formats:** Debian `.deb` packages, Flatpak/Flathub, and AppImages with FUSE 2 compatibility.
-- **Everyday tools:** Falkon, VLC, LibreOffice, Geany, Neovim, GParted, Neofetch, and Btop.
+- **Everyday tools:** Firefox ESR, VLC, LibreOffice, Geany, Neovim, GParted, Neofetch, and Btop.
 - **Hardware support:** Debian firmware packages for common Intel, AMD, Realtek, Atheros, and Intel Wi-Fi/audio hardware.
 - **Installer:** Calamares and Debian installer settings are included in the live image.
 
