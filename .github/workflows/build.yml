@@ -67,6 +67,7 @@ jobs:
       - name: Validate build configuration
         run: |
           test -s config/package-lists/mos-core.list.chroot
+          test -s config/includes.installer/preseed.cfg
           test -s config/includes.chroot/etc/systemd/system/flatpak-flathub-setup.service
           test -s config/includes.chroot/usr/share/plymouth/themes/mighty-linux/mighty-linux.plymouth
           test -s config/includes.chroot/usr/share/plymouth/themes/mighty-linux/mighty-linux.script
@@ -83,6 +84,7 @@ jobs:
             --architectures amd64 \
             --distribution bookworm \
             --binary-images iso-hybrid \
+            --debian-installer live \
             --archive-areas "main contrib non-free non-free-firmware" \
             --image-name mighty-linux \
             --iso-application "Mighty Linux" \
