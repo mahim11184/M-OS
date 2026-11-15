@@ -35,7 +35,7 @@ jobs:
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            live-build debootstrap xorriso squashfs-tools \
+            live-build debootstrap xorriso squashfs-tools cpio \
             grub-pc-bin grub-efi-amd64-bin mtools dosfstools \
             isolinux syslinux-common ca-certificates wget git xz-utils gnupg python3
 
@@ -72,6 +72,7 @@ jobs:
           test -s config/includes.chroot/usr/share/plymouth/themes/mighty-linux/mighty-linux.plymouth
           test -s config/includes.chroot/usr/share/plymouth/themes/mighty-linux/mighty-linux.script
           test -s config/includes.chroot/usr/share/plymouth/themes/mighty-linux/boot.jpg
+          command -v cpio >/dev/null
           grep -qx 'libfuse2' config/package-lists/mos-core.list.chroot
           grep -qx 'flatpak' config/package-lists/mos-core.list.chroot
 
