@@ -19,9 +19,9 @@
 
 - **Familiar desktop:** XFCE with a Windows-style bottom panel, Whisker application menu, task buttons, system tray, volume control, and clock.
 - **Lightweight foundation:** XFCE and Openbox keep the desktop simpler than a full heavyweight desktop environment.
-- **Custom identity:** Mighty Linux wallpaper collection, GRUB background, LightDM greeter styling, and a custom animated Plymouth boot theme.
+- **Custom identity:** Mighty Linux wallpaper collection, GRUB background, LightDM greeter styling, an explicitly configured graphical login, and a custom animated Plymouth boot theme.
 - **Three application formats:** Debian `.deb` packages, Flatpak/Flathub, and AppImages with FUSE 2 compatibility.
-- **Everyday tools:** Falkon, VLC, LibreOffice, Geany, Neovim, GParted, Neofetch, and Btop.
+- **Everyday tools:** Firefox ESR, VLC, LibreOffice, Geany, Neovim, GParted, Neofetch, and Btop.
 - **Hardware support:** Debian firmware packages for common Intel, AMD, Realtek, Atheros, and Intel Wi-Fi/audio hardware.
 - **Installer:** Calamares and Debian installer settings are included in the live image.
 
@@ -68,24 +68,35 @@ The build currently targets **64-bit x86 (amd64)**. Hardware support depends on 
 
 ## 🛠️ Building the ISO
 
-The GitHub Actions workflow builds the live ISO from the Debian Bookworm configuration.
+The GitHub Actions workflow builds the live ISO from the Debian Bookworm configuration. It installs the host-side `cpio` utility required by Debian Live Build's Debian Installer stage.
 
 1. Open the repository's **Actions** tab.
 2. Select **Build Mighty Linux ISO**.
 3. Select **Run workflow** for a manual build, or push a change to `main`.
 4. Download the `mighty-linux-iso` workflow artifact. Successful builds pushed to `main` automatically publish a normal GitHub Beta release (not marked as a prerelease), with the ISO and SHA-256 checksum.
 
-To build locally on a Debian Bookworm machine, install `live-build`, `debootstrap`, `xorriso`, and `squashfs-tools`, then run:
+To build locally on Debian Bookworm, install the same host-side tools used by CI and run the matching configuration:
 
 ```bash
+sudo apt-get update
+sudo apt-get install -y live-build debootstrap xorriso squashfs-tools cpio \
+  grub-pc-bin grub-efi-amd64-bin mtools dosfstools isolinux syslinux-common
+
 sudo lb config \
   --architectures amd64 \
   --distribution bookworm \
   --binary-images iso-hybrid \
+  --debian-installer live \
   --archive-areas "main contrib non-free non-free-firmware" \
-  --image-name mighty-linux
+  --image-name mighty-linux \
+  --iso-application "Mighty Linux" \
+  --iso-publisher "Mighty Linux by MOS" \
+  --iso-volume "MIGHTY_LINUX" \
+  --bootappend-live "boot=live components quiet splash"
 sudo lb build
 ```
+
+The automated workflow also stages the artwork and enables the first-boot Flathub service before running `lb build`; follow the corresponding steps in `.github/workflows/build.yml` when reproducing the complete CI image locally.
 
 ## 📁 Repository layout
 
@@ -99,6 +110,7 @@ M-OS/
 │   ├── includes.chroot/            # Files copied into the live filesystem
 │   │   ├── etc/                    # Branding, services, desktop defaults
 │   │   └── usr/share/plymouth/     # Custom animated boot theme
+│   ├── includes.installer/         # Debian Installer preseeding and files
 │   └── hooks/live/                 # Build-time chroot hooks
 └── README.md
 ```

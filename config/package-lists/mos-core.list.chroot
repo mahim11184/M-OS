@@ -1,4 +1,7 @@
 # Mighty Linux desktop and live system
+# Explicit XFCE desktop task ensures a complete graphical session is present.
+task-xfce-desktop
+xorg
 live-boot
 live-config
 live-config-systemd
@@ -81,7 +84,7 @@ libreoffice-calc
 libreoffice-impress
 libreoffice-gtk3
 vlc
-falkon
+firefox-esr
 geany
 neovim
 btop

@@ -11,7 +11,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: mighty-linux-${{ github.ref }}
@@ -29,13 +29,13 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install live-build dependencies
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            live-build debootstrap xorriso squashfs-tools \
+            live-build debootstrap xorriso squashfs-tools cpio \
             grub-pc-bin grub-efi-amd64-bin mtools dosfstools \
             isolinux syslinux-common ca-certificates wget git xz-utils gnupg python3
 
@@ -67,12 +67,17 @@ jobs:
       - name: Validate build configuration
         run: |
           test -s config/package-lists/mos-core.list.chroot
+          test -s config/includes.installer/preseed.cfg
           test -s config/includes.chroot/etc/systemd/system/flatpak-flathub-setup.service
           test -s config/includes.chroot/usr/share/plymouth/themes/mighty-linux/mighty-linux.plymouth
           test -s config/includes.chroot/usr/share/plymouth/themes/mighty-linux/mighty-linux.script
           test -s config/includes.chroot/usr/share/plymouth/themes/mighty-linux/boot.jpg
+          command -v cpio >/dev/null
           grep -qx 'libfuse2' config/package-lists/mos-core.list.chroot
           grep -qx 'flatpak' config/package-lists/mos-core.list.chroot
+          grep -qx 'firefox-esr' config/package-lists/mos-core.list.chroot
+          ! grep -qx 'falkon' config/package-lists/mos-core.list.chroot
+          grep -qx 'd-i live-installer/enable boolean false' config/includes.installer/preseed.cfg
 
       - name: Make live-build hooks executable
         run: chmod +x config/hooks/live/*.hook.chroot
@@ -83,6 +88,7 @@ jobs:
             --architectures amd64 \
             --distribution bookworm \
             --binary-images iso-hybrid \
+            --debian-installer live \
             --archive-areas "main contrib non-free non-free-firmware" \
             --image-name mighty-linux \
             --iso-application "Mighty Linux" \
@@ -90,6 +96,15 @@ jobs:
             --iso-volume "MIGHTY_LINUX" \
             --bootappend-live "boot=live components quiet splash"
           lb build
+
+      - name: Verify graphical desktop in built filesystem
+        run: |
+          test -x chroot/usr/sbin/lightdm
+          test -x chroot/usr/bin/startxfce4
+          test -x chroot/usr/bin/openbox
+          grep -qx '/usr/sbin/lightdm' chroot/etc/X11/default-display-manager
+          test -L chroot/etc/systemd/system/display-manager.service
+          test -L chroot/etc/systemd/system/default.target
 
       - name: Generate SHA-256 checksums
         shell: bash
@@ -101,7 +116,7 @@ jobs:
           sha256sum "${images[@]}" > SHA256SUMS
 
       - name: Upload ISO artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mighty-linux-iso
           path: |
@@ -110,8 +125,22 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  publish:
+    name: Publish Mighty Linux Beta release
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download ISO artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: mighty-linux-iso
+
       - name: Remove previous releases and their tags (one-time cleanup)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[cleanup-releases]')
+        if: contains(github.event.head_commit.message, '[cleanup-releases]')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
@@ -157,8 +186,7 @@ jobs:
           PY
 
       - name: Publish Mighty Linux Beta release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: "v1.0.0-beta.${{ github.run_number }}"
           name: "Mighty Linux Beta 1.0.0 (Build ${{ github.run_number }})"
@@ -176,3 +204,4 @@ jobs:
             SHA256SUMS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
