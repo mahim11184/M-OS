@@ -75,6 +75,9 @@ jobs:
           command -v cpio >/dev/null
           grep -qx 'libfuse2' config/package-lists/mos-core.list.chroot
           grep -qx 'flatpak' config/package-lists/mos-core.list.chroot
+          grep -qx 'firefox-esr' config/package-lists/mos-core.list.chroot
+          ! grep -qx 'falkon' config/package-lists/mos-core.list.chroot
+          grep -qx 'd-i live-installer/enable boolean false' config/includes.installer/preseed.cfg
 
       - name: Make live-build hooks executable
         run: chmod +x config/hooks/live/*.hook.chroot
@@ -93,6 +96,15 @@ jobs:
             --iso-volume "MIGHTY_LINUX" \
             --bootappend-live "boot=live components quiet splash"
           lb build
+
+      - name: Verify graphical desktop in built filesystem
+        run: |
+          test -x chroot/usr/sbin/lightdm
+          test -x chroot/usr/bin/startxfce4
+          test -x chroot/usr/bin/openbox
+          grep -qx '/usr/sbin/lightdm' chroot/etc/X11/default-display-manager
+          test -L chroot/etc/systemd/system/display-manager.service
+          test -L chroot/etc/systemd/system/default.target
 
       - name: Generate SHA-256 checksums
         shell: bash
