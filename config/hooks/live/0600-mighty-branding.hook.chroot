@@ -7,3 +7,19 @@ if command -v plymouth-set-default-theme >/dev/null 2>&1; then
 elif command -v update-initramfs >/dev/null 2>&1; then
     update-initramfs -u -k all
 fi
+
+# Explicitly select LightDM. A noninteractive package build can otherwise leave
+# the system without a registered display manager and boot to a text console.
+if [ ! -x /usr/sbin/lightdm ] || [ ! -e /lib/systemd/system/lightdm.service ]; then
+    echo "LightDM or its systemd service is missing; refusing to build a console-only image." >&2
+    exit 1
+fi
+
+install -d -m 0755 /etc/X11 /etc/systemd/system
+printf '%s\n' '/usr/sbin/lightdm' > /etc/X11/default-display-manager
+ln -sfn /lib/systemd/system/lightdm.service /etc/systemd/system/display-manager.service
+ln -sfn /lib/systemd/system/graphical.target /etc/systemd/system/default.target
+
+# Fail the build if the expected desktop session or window manager is absent.
+test -x /usr/bin/startxfce4
+test -x /usr/bin/openbox
